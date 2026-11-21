@@ -16,6 +16,28 @@ import RealModule
 import _TestSupport
 
 final class ElementaryFunctionTests: XCTestCase {
+  func testSinLargeImaginaryQuadrantSigns() {
+    func check<T: Real & FixedWidthFloatingPoint>(_: T.Type) {
+      let x = 3 * T.pi / 4
+      for y in [T(40), -40] {
+        let result = Complex<T>.sin(Complex(x, y))
+        let input = "\(T.self) sin(3π/4 + (\(y))i)"
+        XCTAssertTrue(result.real.isFinite, "\(input) real component must be finite")
+        XCTAssertTrue(result.imaginary.isFinite, "\(input) imaginary component must be finite")
+        // sin(x + iy) = sin(x) cosh(y) + i cos(x) sinh(y).
+        XCTAssertGreaterThan(result.real, 0, "\(input) real sign")
+        if y > 0 {
+          XCTAssertLessThan(result.imaginary, 0, "\(input) imaginary sign")
+        } else {
+          XCTAssertGreaterThan(result.imaginary, 0, "\(input) imaginary sign")
+        }
+      }
+    }
+
+    check(Float.self)
+    check(Double.self)
+  }
+
   
   func testExp<T: Real & FixedWidthFloatingPoint>(_ type: T.Type) {
     // exp(0) = 1
